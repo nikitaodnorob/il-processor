@@ -1,4 +1,4 @@
-﻿namespace Lexer
+﻿namespace ILLexer
 {
     public enum LexemeKind
     {
@@ -9,20 +9,26 @@
         Entity, // [lib]Namespace.Class::Field
         NumberLiteral,
         StringLiteral,
+        StringDirective, // todo: naming
         LeftRoundBracket, // (
         RightRoundBracket, // )
         LeftSquareBracket, // [
         RightSquareBracket, // ]
         LeftFigureBracket, // {
         RightFigureBracket, // }
+        LeftTemplateBracket, // <
+        RightTemplateBracket, // >
+        ExclamationMark, // !
+        EqualOperator, // =
         Label, // IL_0001
         Dot, // .
         Comma, // ,
         Semicolon, // ;
         Colon, // :
         DoubleColon, // ::
+        DoubleSquareBracket, // []
         Slash, // /
-        Id, // <name>:
+        TripleDot, // ...
         LineEnd, // \n
     }
 }

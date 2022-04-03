@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 
-namespace Lexer
+namespace ILLexer
 {
     public partial class Lexer
     {
         private static readonly List<string> Keywords = new List<string>
         {
             "public",
+            "protected",
+            "private",
             "abstract",
             "sealed",
             "auto",
@@ -20,6 +22,18 @@ namespace Lexer
             "managed",
             "instance",
             "init",
+            "void",
+            "valuetype",
+            "specialname",
+            "rtspecialname",
+            "native",
+            "assembly",
+            "only",
+            "nested",
+            "serializable",
+            "endfinally",
+            "finally",
+            "literal"
         };
     }
 }

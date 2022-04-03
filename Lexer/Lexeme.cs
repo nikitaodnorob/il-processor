@@ -1,4 +1,4 @@
-﻿namespace Lexer
+﻿namespace ILLexer
 {
     public struct Lexeme
     {

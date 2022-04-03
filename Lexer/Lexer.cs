@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Lexer
+namespace ILLexer
 {
     public partial class Lexer
     {
@@ -30,7 +30,7 @@ namespace Lexer
                 // skip single line comment
                 if (TryGetSubstring(ilLine, i, 2) == "//")
                 {
-                    PrintLexemes(lexemes);
+                    // PrintLexemes(lexemes);
                     return lexemes;
                 }
                 
@@ -41,13 +41,17 @@ namespace Lexer
                 }
                 
                 bool wasFoundLexeme =
-                    ProcessSingleCharTokens(lexemes, ilLine, lineNumber, ref i) ||
+                    ProcessMultiComment(lexemes, ilLine, lineNumber, ref i) ||
                     ProcessLabel(lexemes, ilLine, lineNumber, ref i) ||
                     ProcessAssemblerCommand(lexemes, ilLine, lineNumber, ref i) ||
                     ProcessKeyword(lexemes, ilLine, lineNumber, ref i) ||
                     ProcessDirective(lexemes, ilLine, lineNumber, ref i) ||
                     ProcessEntity(lexemes, ilLine, lineNumber, ref i) ||
-                    ProcessNumberLiteral(lexemes, ilLine, lineNumber, ref i);
+                    ProcessNumberLiteral(lexemes, ilLine, lineNumber, ref i) ||
+                    ProcessString(lexemes, ilLine, lineNumber, ref i) ||
+                    ProcessStringDirective(lexemes, ilLine, lineNumber, ref i) ||
+                    ProcessMultipleCharTokens(lexemes, ilLine, lineNumber, ref i) ||
+                    ProcessSingleCharTokens(lexemes, ilLine, lineNumber, ref i);
 
                 if (!wasFoundLexeme)
                 {
@@ -55,7 +59,14 @@ namespace Lexer
                 }
             }
             
-            PrintLexemes(lexemes);
+            lexemes.Add(new Lexeme
+            {
+                Kind = LexemeKind.LineEnd,
+                LexemeText = "",
+                LexemePosition = (lineNumber, ilLine.Length + 1, lineNumber, ilLine.Length + 1)
+            });
+            
+            // PrintLexemes(lexemes);
             return lexemes;
         }
 
@@ -69,7 +80,14 @@ namespace Lexer
                 new KeyValuePair<char, LexemeKind>('}', LexemeKind.RightFigureBracket),
                 new KeyValuePair<char, LexemeKind>('(', LexemeKind.LeftRoundBracket),
                 new KeyValuePair<char, LexemeKind>(')', LexemeKind.RightRoundBracket),
+                new KeyValuePair<char, LexemeKind>('[', LexemeKind.LeftSquareBracket),
+                new KeyValuePair<char, LexemeKind>(']', LexemeKind.RightSquareBracket),
+                new KeyValuePair<char, LexemeKind>('<', LexemeKind.LeftTemplateBracket),
+                new KeyValuePair<char, LexemeKind>('>', LexemeKind.RightTemplateBracket),
                 new KeyValuePair<char, LexemeKind>(',', LexemeKind.Comma),
+                new KeyValuePair<char, LexemeKind>('=', LexemeKind.EqualOperator),
+                new KeyValuePair<char, LexemeKind>('!', LexemeKind.ExclamationMark),
+                new KeyValuePair<char, LexemeKind>('/', LexemeKind.Slash),
             });
 
             if (!tokens.ContainsKey(ilLine[colNumber])) return false;
@@ -85,14 +103,47 @@ namespace Lexer
             return true;
         }
 
+        private static bool ProcessMultipleCharTokens(
+            List<Lexeme> lexemes, string ilLine,
+            int lineNumber, ref int colNumber
+        )
+        {
+            var tokens = new Dictionary<string, LexemeKind>(new[]
+            {
+                new KeyValuePair<string, LexemeKind>("::", LexemeKind.DoubleColon),
+                new KeyValuePair<string, LexemeKind>("[]", LexemeKind.DoubleSquareBracket),
+                new KeyValuePair<string, LexemeKind>("0...", LexemeKind.TripleDot),
+            });
+
+            int colNumberCopy = colNumber;
+            var currentToken = tokens.Keys.ToList().Find(
+                token => token == TryGetSubstring(ilLine, colNumberCopy, token.Length)
+            );
+            if (currentToken == null) return false;
+            
+            lexemes.Add(new Lexeme
+            {
+                Kind = tokens[currentToken],
+                LexemeText = currentToken,
+                LexemePosition = (lineNumber, colNumber + 1, lineNumber, colNumber + 1 + currentToken.Length)
+            });
+            colNumber += currentToken.Length - 1;
+
+            return true;
+        }
+
         private static bool ProcessNumberLiteral(
             List<Lexeme> lexemes, string ilLine,
             int lineNumber, ref int colNumber
         )
         {
-            if (!char.IsDigit(ilLine[colNumber])) return false;
+            if (!char.IsDigit(ilLine[colNumber]) && ilLine[colNumber] != '-') return false;
+            if (TryGetSubstring(ilLine, colNumber, 4) == "0...") return false;
 
-            var numberLiteral = string.Join("", ilLine[colNumber..].TakeWhile(char.IsDigit).ToArray());
+            var numberLiteral = string.Join(
+                "",
+                ilLine[colNumber..].TakeWhile(c => char.IsDigit(c) || c is '.' or '-' or 'E').ToArray()
+            );
             lexemes.Add(new Lexeme
             {
                 Kind = LexemeKind.NumberLiteral,
@@ -199,7 +250,7 @@ namespace Lexer
             int lineNumber, ref int colNumber
         )
         {
-            if (ilLine[colNumber] != '.') return false;
+            if (ilLine[colNumber] != '.' && ilLine[colNumber] != '[') return false;
 
             int colNumberCopy = colNumber;
             var currentDirective = Directives.Find(
@@ -219,17 +270,81 @@ namespace Lexer
             return true;
         }
 
+        private static bool ProcessString(
+            List<Lexeme> lexemes, string ilLine,
+            int lineNumber, ref int colNumber
+        )
+        {
+            if (ilLine[colNumber] != '"') return false;
+            
+            int closingQuoteInd = ilLine.IndexOf('"', colNumber + 1);
+
+            if (closingQuoteInd == -1) return false;
+
+            lexemes.Add(new Lexeme
+            {
+                Kind = LexemeKind.StringLiteral,
+                LexemeText = ilLine.Substring(colNumber + 1, closingQuoteInd - colNumber - 1),
+                LexemePosition = (lineNumber, colNumber + 1, lineNumber, closingQuoteInd + 1)
+            });
+            colNumber = closingQuoteInd + 1;
+
+            return true;
+        }
+
+        private static bool ProcessStringDirective(
+            List<Lexeme> lexemes, string ilLine,
+            int lineNumber, ref int colNumber
+        )
+        {
+            if (ilLine[colNumber] != '\'') return false;
+
+            int closingQuoteInd = ilLine.IndexOf('\'', colNumber + 1);
+
+            if (closingQuoteInd == -1) return false;
+
+            lexemes.Add(new Lexeme
+            {
+                Kind = LexemeKind.StringDirective,
+                LexemeText = ilLine.Substring(colNumber + 1, closingQuoteInd - colNumber - 1),
+                LexemePosition = (lineNumber, colNumber + 1, lineNumber, closingQuoteInd + 1)
+            });
+            colNumber = closingQuoteInd;
+
+            return true;
+        }
+        
+        private static bool ProcessMultiComment(
+            List<Lexeme> lexemes, string ilLine,
+            int lineNumber, ref int colNumber
+        )
+        {
+            if (TryGetSubstring(ilLine, colNumber, 2) != "/*") return false;
+
+            int closingInd = ilLine.IndexOf("*/", colNumber + 2, StringComparison.Ordinal);
+            if (closingInd == -1) return false;
+            
+            colNumber = closingInd + 1;
+
+            return true;
+        }
+
         private static bool ProcessEntity(
             List<Lexeme> lexemes, string ilLine,
             int lineNumber, ref int colNumber
         )
         {
+            if (TryGetSubstring(ilLine, colNumber, 2) == "[]") return false;
+            if (TryGetSubstring(ilLine, colNumber, 5) == "[0...") return false;
+            
             if (!char.IsLetter(ilLine[colNumber]) && ilLine[colNumber] != '[') return false;
             
-            int classEndPos = ilLine.IndexOfAny(new[] {' ', '\t', '(', ')', ','}, colNumber + 1);
-            var currentEntity = classEndPos > -1
-                ? ilLine[colNumber..classEndPos]
+            int entityEndPos = ilLine.IndexOfAny(new[] {' ', '\t', '(', ')', ',', '<', '>', '\'', '/'}, colNumber + 1);
+            var currentEntity = entityEndPos > -1
+                ? ilLine[colNumber..entityEndPos]
                 : ilLine[colNumber..];
+
+            currentEntity = currentEntity.Replace("[0...", "");
 
             lexemes.Add(new Lexeme
             {
@@ -258,7 +373,16 @@ namespace Lexer
         {
             foreach (var lexeme in lexemes)
             {
+                // if (lexeme.Kind == LexemeKind.LineEnd) continue;
+                // if (lexeme.Kind == LexemeKind.Label) continue;
+
+                if (lexeme.Kind == LexemeKind.Entity)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+                
                 Console.WriteLine($"{lexeme.Kind}:\t{lexeme.LexemeText}");
+                Console.ResetColor();
             }
         }
 

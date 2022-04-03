@@ -1,14 +1,10 @@
-﻿using System;
-using System.IO;
+﻿namespace ILLexer;
 
-namespace Lexer
+static class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            string testIlCode = File.ReadAllText(@"../../../../../master-diploma/01_ulearn_rectangles/author1/my_release.il");
-            Lexer.GetLexemes(testIlCode);
-        }
+        string testIlCode = File.ReadAllText(@"../../../../../master-diploma/01_ulearn_rectangles/author1/my_release.il");
+        Lexer.GetLexemes(testIlCode);
     }
 }
