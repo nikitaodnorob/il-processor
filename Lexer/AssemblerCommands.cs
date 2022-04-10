@@ -30,6 +30,7 @@ namespace ILLexer
             "leave.s",
             "conv.r8",
             "ldc.r8",
+            "cgt.un",
             "blt.s",
             "bgt.s",
             "ble.s",
@@ -66,6 +67,7 @@ namespace ILLexer
             "rem",
             "neg",
             "box",
+            "nop",
             "br"
         };
         

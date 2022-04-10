@@ -142,7 +142,7 @@ namespace ILLexer
 
             var numberLiteral = string.Join(
                 "",
-                ilLine[colNumber..].TakeWhile(c => char.IsDigit(c) || c is '.' or '-' or 'E').ToArray()
+                ilLine[colNumber..].TakeWhile(c => char.IsDigit(c) || c is '.' or '-' or '+' or 'E').ToArray()
             );
             lexemes.Add(new Lexeme
             {
