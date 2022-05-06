@@ -19,7 +19,7 @@ static class Program
             string ilCode = File.ReadAllText($"../../../../../master-diploma/{fileName}");
             Console.WriteLine($"Processing {fileName}");
             var fileLexemes = Lexer.GetLexemes(ilCode);
-            Codes.Add(fileName, CorrectFileLexemes(fileLexemes));
+            Codes.Add(fileName, fileLexemes);
             clusters.Add(new List<string> {fileName});
         }
         Console.WriteLine("==================");
@@ -152,6 +152,9 @@ static class Program
 
     private static double GetCodesJaccardDistance(List<Lexeme> codeA, List<Lexeme> codeB)
     {
+        // codeA = CorrectFileLexemes(codeA);
+        // codeB = CorrectFileLexemes(codeB);
+        
         var codeALexemes = new HashSet<string>();
         var codeBLexemes = new HashSet<string>();
         codeA.ForEach(lexeme => codeALexemes.Add(lexeme.LexemeText));
@@ -166,7 +169,15 @@ static class Program
     private static void CountLexemesBag()
     {
         var lexemes = new HashSet<string>();
-        foreach (var code in Codes)
+
+        var correctedCodes = new Dictionary<string, List<Lexeme>>();
+        foreach (var fileName in Codes.Keys)
+        {
+            correctedCodes.Add(fileName, CorrectFileLexemes(Codes[fileName]));
+            // correctedCodes.Add(fileName, Codes[fileName]);
+        }
+
+        foreach (var code in correctedCodes)
         {
             code.Value.ForEach(lexeme =>
             {
@@ -177,15 +188,15 @@ static class Program
         var idf = new Dictionary<string, double>();
         foreach (var lexemeText in lexemes)
         {
-            int codesCnt = Codes.Count(
+            int codesCnt = correctedCodes.Count(
                 code => code.Value.Select(lexeme => lexeme.LexemeText).Contains(lexemeText)
             );
-            idf[lexemeText] = 1d + Math.Log(1d * Codes.Count / codesCnt);
+            idf[lexemeText] = 1d + Math.Log(1d * correctedCodes.Count / codesCnt);
             // if (idf[lexemeText] < 1.3) Console.WriteLine(lexemeText);
         }
 
         int allLexemesCnt = lexemes.Count;
-        foreach (var code in Codes)
+        foreach (var code in correctedCodes)
         {
             LexemesBag.Add(code.Key, new double[allLexemesCnt]);
             int lexemeI = 0;
@@ -194,7 +205,7 @@ static class Program
                 // count
                 LexemesBag[code.Key][lexemeI] = code.Value.Count(lexeme => lexeme.LexemeText == lexemeText);
                 // tf
-                LexemesBag[code.Key][lexemeI] /= Codes[code.Key].Count;
+                LexemesBag[code.Key][lexemeI] /= correctedCodes[code.Key].Count;
                 // idf
                 LexemesBag[code.Key][lexemeI] *= idf[lexemeText];
                 lexemeI++;
