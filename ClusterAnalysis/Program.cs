@@ -101,10 +101,10 @@ static class Program
         Console.WriteLine($"N1 (really one cluster) = {rightOneClusterCnt}");
         Console.WriteLine($"N2 (wrong one cluster) = {wrongOneClusterCnt}");
         Console.WriteLine($"N3 (wrong different clusters) = {wrongDifferentClustersCnt}");
-        Console.WriteLine($"N4 (really different clusters) = {rightDifferentClustersCnt}");
+        // Console.WriteLine($"N4 (really different clusters) = {rightDifferentClustersCnt}");
 
-        double accuracy = (6d * rightOneClusterCnt - 4d * wrongOneClusterCnt - 2d * wrongDifferentClustersCnt + rightDifferentClustersCnt) /
-                          (5 * ILCodes.Files.Count * ILCodes.Files.Count) + 0.4;
+        double accuracy = (4d * rightOneClusterCnt - 2d * wrongOneClusterCnt - wrongDifferentClustersCnt) /
+                          (6d * (rightOneClusterCnt + wrongOneClusterCnt + wrongDifferentClustersCnt)) + 1d / 3;
         Console.WriteLine($"Accuracy = {accuracy}");
     }
 
@@ -125,6 +125,8 @@ static class Program
         }
 
         if (nearestClusters.Item3 > MaxClustersDistance) return null;
+
+        if (nearestClusters.Item1 == null || nearestClusters.Item2 == null) return null;
 
         return (nearestClusters.Item1, nearestClusters.Item2);
     }
