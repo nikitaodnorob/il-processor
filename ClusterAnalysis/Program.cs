@@ -8,8 +8,6 @@ internal static class Program
     private static readonly Dictionary<string, double[]> LexemesBag = new();
     private static readonly Dictionary<string, List<int>> StringLiteralsList = new();
 
-    private const double MaxClustersDistance = 0.05;
-    
     public static void Main(string[] args)
     {
         var clusters = new List<List<string>>();
@@ -124,7 +122,7 @@ internal static class Program
             }
         }
 
-        if (nearestClusters.Item3 > MaxClustersDistance) return null;
+        if (nearestClusters.Item3 > Settings.MaxClustersDistance) return null;
 
         if (nearestClusters.Item1 == null || nearestClusters.Item2 == null) return null;
 
@@ -144,18 +142,21 @@ internal static class Program
 
     private static double GetCodesDistance(string fileNameA, string fileNameB)
     {
-        // return GetCodesJaccardDistance(fileNameA, fileNameB);
-        return GetCodesCosDistance(fileNameA, fileNameB);
+        if (Settings.DistanceMetric == DistanceMetric.Jaccard)
+            return GetCodesJaccardDistance(fileNameA, fileNameB);
+        if (Settings.DistanceMetric == DistanceMetric.Cosine)
+            return GetCodesCosDistance(fileNameA, fileNameB);
+        return 0;
     }
 
     private static void PrepareForCount()
     {
         var correctedCodes = new Dictionary<string, List<Lexeme>>();
         foreach (var fileName in Codes.Keys)
-        {
-            correctedCodes.Add(fileName, CorrectFileLexemes(Codes[fileName]));
-            // correctedCodes.Add(fileName, Codes[fileName]);
-        }
+            correctedCodes.Add(
+                fileName,
+                Settings.IsLexemesFiltering ? LexemesFilter.Filter(Codes[fileName]) : Codes[fileName]
+            );
 
         var lexemesText = GetUniqLexemesText(correctedCodes);
         var stringLiterals = GetUniqStringLiterals(correctedCodes).ToList();
@@ -262,44 +263,6 @@ internal static class Program
         // Console.WriteLine(fileNameA + "-" + fileNameB + "=" + CosDistance(vecA, vecB));
         
         return CosDistance(vecA, vecB);
-    }
-
-    private static List<Lexeme> CorrectFileLexemes(List<Lexeme> lexemes)
-    {
-        var lexemesWithoutPunctuation = lexemes.Where(
-            lexeme => lexeme.LexemeText is not "{" or "}" or "[" or "]" or "(" or ")" or "," or ""
-        );
-        
-        var lexemesWithoutUselessKeywords = lexemesWithoutPunctuation.Where(
-            lexeme => lexeme.LexemeText is not "sealed" or "auto" or "ansi" or "beforefieldinit"
-                or "hidebysig" or "managed" or "valuetype" or "specialname" or "rtspecialname" 
-                or "native" or "assembly" or "only" or "nested" or "serializable" or "literal"
-                or ".maxstack" or ".locals" or ".custom"
-        );
-
-        var lexemesWithoutLabels = lexemesWithoutUselessKeywords.Where(
-            lexeme => lexeme.Kind != LexemeKind.Label ||
-                      lexeme.Kind == LexemeKind.AssemblerCommand && lexeme.LexemeText == "nop"
-        );
-
-        var lexemesWithCorrectedSharpEntities = lexemesWithoutLabels.Select(lexeme =>
-        {
-            if (lexeme.Kind != LexemeKind.Entity) return lexeme;
-            return new Lexeme
-            {
-                Kind = LexemeKind.Entity, LexemePosition = lexeme.LexemePosition,
-                LexemeText = lexeme.LexemeText
-                    .Replace("[mscorlib]", "[library]")
-                    .Replace("[System.Runtime]", "[library]")
-                    .Replace("[System.Runtime.Extensions]", "[library]")
-                    .Replace("[System.Core]", "[library]")
-                    .Replace("[System.Linq]", "[library]")
-            };
-        });
-        
-        // Console.WriteLine($"{lexemes.Count} -> {lexemesWithCorrectedSharpEntities.Count()}");
-        
-        return lexemesWithCorrectedSharpEntities.ToList();
     }
 
     private static double CosDistance(double[] vecA, double[] vecB)
