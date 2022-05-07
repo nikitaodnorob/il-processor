@@ -1,12 +1,12 @@
-﻿using System.Numerics;
-using ILLexer;
+﻿using ILLexer;
 
 namespace ClusterAnalysis;
 
-static class Program
+internal static class Program
 {
     private static readonly Dictionary<string, List<Lexeme>> Codes = new();
     private static readonly Dictionary<string, double[]> LexemesBag = new();
+    private static readonly Dictionary<string, List<int>> StringLiteralsList = new();
 
     private const double MaxClustersDistance = 0.05;
     
@@ -24,7 +24,7 @@ static class Program
         }
         Console.WriteLine("==================");
 
-        CountLexemesBag();
+        PrepareForCount();
 
         while (true)
         {
@@ -46,7 +46,7 @@ static class Program
         int rightOneClusterCnt = 0;
         int wrongOneClusterCnt = 0;
         int wrongDifferentClustersCnt = 0;
-        int rightDifferentClustersCnt = 0;
+        // int rightDifferentClustersCnt = 0;
         
         // check accuracy
         for (int i = 0; i < ILCodes.Files.Count; i++)
@@ -87,10 +87,10 @@ static class Program
                     // Console.ResetColor();
                     wrongDifferentClustersCnt++;
                 }
-                else if (author1 != author2 && cluster1 != cluster2)
-                {
-                    rightDifferentClustersCnt++;
-                }
+                // else if (author1 != author2 && cluster1 != cluster2)
+                // {
+                //     rightDifferentClustersCnt++;
+                // }
             }
         }
 
@@ -136,24 +136,110 @@ static class Program
         double distanceSum = 0;
 
         foreach (string fileA in clusterA)
-        {
             foreach (string fileB in clusterB)
-            {
-                distanceSum += GetCodesDistance(Codes[fileA], Codes[fileB], fileA, fileB);
-            }
-        }
+                distanceSum += GetCodesDistance(fileA, fileB);
 
         return distanceSum / clusterA.Count / clusterB.Count;
     }
 
-    private static double GetCodesDistance(List<Lexeme> codeA, List<Lexeme> codeB, string fileNameA, string fileNameB)
+    private static double GetCodesDistance(string fileNameA, string fileNameB)
     {
-        // return GetCodesJaccardDistance(codeA, codeB);
+        // return GetCodesJaccardDistance(fileNameA, fileNameB);
         return GetCodesCosDistance(fileNameA, fileNameB);
     }
 
-    private static double GetCodesJaccardDistance(List<Lexeme> codeA, List<Lexeme> codeB)
+    private static void PrepareForCount()
     {
+        var correctedCodes = new Dictionary<string, List<Lexeme>>();
+        foreach (var fileName in Codes.Keys)
+        {
+            correctedCodes.Add(fileName, CorrectFileLexemes(Codes[fileName]));
+            // correctedCodes.Add(fileName, Codes[fileName]);
+        }
+
+        var lexemesText = GetUniqLexemesText(correctedCodes);
+        var stringLiterals = GetUniqStringLiterals(correctedCodes).ToList();
+
+        var idf = GetIDF(lexemesText, correctedCodes);
+
+        FillLexemesBag(lexemesText, correctedCodes, idf);
+        FillStringLiteralsList(stringLiterals, correctedCodes);
+    }
+
+    private static HashSet<string> GetUniqLexemesText(Dictionary<string, List<Lexeme>> codes)
+    {
+        var lexemes = new HashSet<string>();
+
+        foreach (var code in codes)
+            foreach (var lexeme in code.Value.Where(lexeme => lexeme.LexemeText.Length > 0))
+                lexemes.Add(lexeme.LexemeText);
+
+        return lexemes;
+    }
+    
+    private static HashSet<string> GetUniqStringLiterals(Dictionary<string, List<Lexeme>> codes)
+    {
+        var stringLiterals = new HashSet<string>();
+
+        foreach (var code in codes)
+            foreach (var lexeme in code.Value.Where(lexeme => lexeme.Kind == LexemeKind.StringLiteral))
+                stringLiterals.Add(lexeme.LexemeText);
+
+        return stringLiterals;
+    }
+
+    private static Dictionary<string, double> GetIDF(HashSet<string> lexemesText, Dictionary<string, List<Lexeme>> codes)
+    {
+        var idf = new Dictionary<string, double>();
+        foreach (var lexemeText in lexemesText)
+        {
+            int codesCnt = codes.Count(
+                code => code.Value.Select(lexeme => lexeme.LexemeText).Contains(lexemeText)
+            );
+            idf[lexemeText] = 1d + Math.Log(1d * codes.Count / codesCnt);
+            // if (idf[lexemeText] < 1.3) Console.WriteLine(lexemeText);
+        }
+
+        return idf;
+    }
+
+    private static void FillLexemesBag(
+        HashSet<string> lexemesText,
+        Dictionary<string, List<Lexeme>> codes,
+        Dictionary<string, double> idf
+    ) {
+        foreach (var code in codes)
+        {
+            LexemesBag.Add(code.Key, new double[lexemesText.Count]);
+            int lexemeI = 0;
+            foreach (var lexemeText in lexemesText)
+            {
+                // count
+                LexemesBag[code.Key][lexemeI] = code.Value.Count(lexeme => lexeme.LexemeText == lexemeText);
+                // tf
+                LexemesBag[code.Key][lexemeI] /= codes[code.Key].Count;
+                // idf
+                LexemesBag[code.Key][lexemeI] *= idf[lexemeText];
+                lexemeI++;
+            }
+        }
+    }
+
+    private static void FillStringLiteralsList(List<string> stringLiterals, Dictionary<string, List<Lexeme>> codes)
+    {
+        foreach (var code in codes)
+        {
+            StringLiteralsList.Add(code.Key, new List<int>());
+            foreach (var lexeme in code.Value.Where(lexeme => lexeme.Kind == LexemeKind.StringLiteral))
+                StringLiteralsList[code.Key].Add(stringLiterals.IndexOf(lexeme.LexemeText));
+        }
+    }
+
+    private static double GetCodesJaccardDistance(string fileNameA, string fileNameB)
+    {
+        var codeA = Codes[fileNameA];
+        var codeB = Codes[fileNameB];
+        
         // codeA = CorrectFileLexemes(codeA);
         // codeB = CorrectFileLexemes(codeB);
         
@@ -166,53 +252,6 @@ static class Program
         int codeABLexemesCount = codeABLexemes.Count();
 
         return 1d - 1d * codeABLexemesCount / (codeALexemes.Count + codeBLexemes.Count - codeABLexemesCount);
-    }
-
-    private static void CountLexemesBag()
-    {
-        var lexemes = new HashSet<string>();
-
-        var correctedCodes = new Dictionary<string, List<Lexeme>>();
-        foreach (var fileName in Codes.Keys)
-        {
-            correctedCodes.Add(fileName, CorrectFileLexemes(Codes[fileName]));
-            // correctedCodes.Add(fileName, Codes[fileName]);
-        }
-
-        foreach (var code in correctedCodes)
-        {
-            code.Value.ForEach(lexeme =>
-            {
-                if (lexeme.LexemeText.Length > 0) lexemes.Add(lexeme.LexemeText);
-            });
-        }
-
-        var idf = new Dictionary<string, double>();
-        foreach (var lexemeText in lexemes)
-        {
-            int codesCnt = correctedCodes.Count(
-                code => code.Value.Select(lexeme => lexeme.LexemeText).Contains(lexemeText)
-            );
-            idf[lexemeText] = 1d + Math.Log(1d * correctedCodes.Count / codesCnt);
-            // if (idf[lexemeText] < 1.3) Console.WriteLine(lexemeText);
-        }
-
-        int allLexemesCnt = lexemes.Count;
-        foreach (var code in correctedCodes)
-        {
-            LexemesBag.Add(code.Key, new double[allLexemesCnt]);
-            int lexemeI = 0;
-            foreach (var lexemeText in lexemes)
-            {
-                // count
-                LexemesBag[code.Key][lexemeI] = code.Value.Count(lexeme => lexeme.LexemeText == lexemeText);
-                // tf
-                LexemesBag[code.Key][lexemeI] /= correctedCodes[code.Key].Count;
-                // idf
-                LexemesBag[code.Key][lexemeI] *= idf[lexemeText];
-                lexemeI++;
-            }
-        }
     }
 
     private static double GetCodesCosDistance(string fileNameA, string fileNameB)
