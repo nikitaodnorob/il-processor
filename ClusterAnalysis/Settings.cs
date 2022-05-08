@@ -4,6 +4,7 @@ public enum DistanceMetric
 {
     Jaccard,
     Cosine,
+    Stylometry,
 }
 
 public static class Settings

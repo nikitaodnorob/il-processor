@@ -6,10 +6,13 @@ public static class LexemesFilter
 {
     public static List<Lexeme> Filter(List<Lexeme> code)
     {
-        var lexemesWithoutPunctuation = code.Where(
-            lexeme => lexeme.LexemeText is not "{" or "}" or "[" or "]" or "(" or ")" or "," or ""
-        );
-        
+        var lexemesWithoutPunctuation = code.Where(lexeme => lexeme.LexemeText is not "," or "");
+
+        if (Settings.DistanceMetric != DistanceMetric.Stylometry)
+            lexemesWithoutPunctuation = code.Where(
+                lexeme => lexeme.LexemeText is not "{" or "}" or "[" or "]" or "(" or ")"
+            );
+
         var lexemesWithoutUselessKeywords = lexemesWithoutPunctuation.Where(
             lexeme => lexeme.LexemeText is not "sealed" or "auto" or "ansi" or "beforefieldinit"
                 or "hidebysig" or "managed" or "valuetype" or "specialname" or "rtspecialname" 

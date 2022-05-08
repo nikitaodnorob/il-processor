@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace ILLexer
+﻿namespace ILLexer
 {
-    public partial class Lexer
+    public static partial class Lexer
     {
         public static List<Lexeme> GetLexemes(string ilCode)
         {

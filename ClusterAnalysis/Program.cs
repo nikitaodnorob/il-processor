@@ -7,6 +7,8 @@ internal static class Program
     private static readonly Dictionary<string, List<Lexeme>> Codes = new();
     private static readonly Dictionary<string, double[]> LexemesBag = new();
     private static readonly Dictionary<string, List<int>> StringLiteralsList = new();
+    private static readonly Dictionary<string, List<int>> NumberLiteralsList = new();
+    private static readonly Dictionary<string, StylometryCodeData> StylometryDataList = new();
 
     public static void Main(string[] args)
     {
@@ -146,6 +148,8 @@ internal static class Program
             return GetCodesJaccardDistance(fileNameA, fileNameB);
         if (Settings.DistanceMetric == DistanceMetric.Cosine)
             return GetCodesCosDistance(fileNameA, fileNameB);
+        if (Settings.DistanceMetric == DistanceMetric.Stylometry)
+            return GetStylometryDistance(fileNameA, fileNameB);
         return 0;
     }
 
@@ -160,11 +164,16 @@ internal static class Program
 
         var lexemesText = GetUniqLexemesText(correctedCodes);
         var stringLiterals = GetUniqStringLiterals(correctedCodes).ToList();
+        var numberLiterals = GetUniqNumberLiterals(correctedCodes).ToList();
 
         var idf = GetIDF(lexemesText, correctedCodes);
 
         FillLexemesBag(lexemesText, correctedCodes, idf);
         FillStringLiteralsList(stringLiterals, correctedCodes);
+        FillNumberLiteralsList(numberLiterals, correctedCodes);
+        
+        foreach (var fileName in Codes.Keys)
+            StylometryDataList.Add(fileName, GetStylometryData(fileName));
     }
 
     private static HashSet<string> GetUniqLexemesText(Dictionary<string, List<Lexeme>> codes)
@@ -187,6 +196,17 @@ internal static class Program
                 stringLiterals.Add(lexeme.LexemeText);
 
         return stringLiterals;
+    }
+    
+    private static HashSet<double> GetUniqNumberLiterals(Dictionary<string, List<Lexeme>> codes)
+    {
+        var numberLiterals = new HashSet<double>();
+
+        foreach (var code in codes)
+            foreach (var lexeme in code.Value.Where(lexeme => lexeme.Kind == LexemeKind.NumberLiteral))
+                numberLiterals.Add(double.Parse(lexeme.LexemeText));
+
+        return numberLiterals;
     }
 
     private static Dictionary<string, double> GetIDF(HashSet<string> lexemesText, Dictionary<string, List<Lexeme>> codes)
@@ -235,6 +255,16 @@ internal static class Program
                 StringLiteralsList[code.Key].Add(stringLiterals.IndexOf(lexeme.LexemeText));
         }
     }
+    
+    private static void FillNumberLiteralsList(List<double> numberLiterals, Dictionary<string, List<Lexeme>> codes)
+    {
+        foreach (var code in codes)
+        {
+            NumberLiteralsList.Add(code.Key, new List<int>());
+            foreach (var lexeme in code.Value.Where(lexeme => lexeme.Kind == LexemeKind.NumberLiteral))
+                NumberLiteralsList[code.Key].Add(numberLiterals.IndexOf(double.Parse(lexeme.LexemeText)));
+        }
+    }
 
     private static double GetCodesJaccardDistance(string fileNameA, string fileNameB)
     {
@@ -263,5 +293,42 @@ internal static class Program
         // Console.WriteLine(fileNameA + "-" + fileNameB + "=" + Vector.CosDistance(vecA, vecB));
         
         return Vector.CosDistance(vecA, vecB);
+    }
+
+    private static double GetStylometryDistance(string fileNameA, string fileNameB)
+    {
+        var dataA = StylometryDataList[fileNameA];
+        var dataB = StylometryDataList[fileNameB];
+
+        var stringLiteralsVecA = StringLiteralsList[fileNameA];
+        var stringLiteralsVecB = StringLiteralsList[fileNameB];
+        var numberLiteralsVecA = NumberLiteralsList[fileNameA];
+        var numberLiteralsVecB = NumberLiteralsList[fileNameB];
+
+        // Console.WriteLine(fileNameA + "-" + fileNameB + "=" + Stylometry.CalcDistance(dataA, dataB, GetCodesCosDistance(fileNameA, fileNameB)));
+
+        return Stylometry.CalcDistance(
+            dataA,
+            dataB,
+            GetCodesCosDistance(fileNameA, fileNameB),
+            Vector.CosDistance(stringLiteralsVecA, stringLiteralsVecB),
+            Vector.CosDistance(numberLiteralsVecA, numberLiteralsVecB)
+        );
+    }
+
+    private static StylometryCodeData GetStylometryData(string fileName)
+    {
+        return Stylometry.CalcStylometryData(Codes[fileName]);
+    }
+
+    private static Func<string, TResult> Cache<TResult>(Func<string, TResult> getter)
+    {
+        var cache = new Dictionary<string, TResult>();
+
+        return fileName =>
+        {
+            if (!cache.ContainsKey(fileName)) cache.Add(fileName, getter(fileName));
+            return cache[fileName];
+        };
     }
 }
