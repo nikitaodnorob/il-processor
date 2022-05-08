@@ -44,11 +44,11 @@ public static class ILCodes
         "05_ulearn_names/author1/my_release.il",
         "05_ulearn_names/author2/my_release.il",
         "05_ulearn_names/author3/my_release.il",
-        "05_ulearn_names/author4/my_release.il",
+        // "05_ulearn_names/author4/my_release.il", // MISTAKE
         "05_ulearn_names/author1-refactored/my_release.il",
         "05_ulearn_names/author2-refactored/my_release.il",
         "05_ulearn_names/author3-refactored/my_release.il",
-        "05_ulearn_names/author4-refactored/my_release.il",
+        // "05_ulearn_names/author4-refactored/my_release.il", // MISTAKE
         
         "06_ulearn_text_analysis/author1/my_release.il",
         "06_ulearn_text_analysis/author2/my_release.il",
@@ -62,11 +62,11 @@ public static class ILCodes
         
         "09_ulearn_autocomplete/author1/my_debug.il",
         "09_ulearn_autocomplete/author2/my_debug.il",
-        "09_ulearn_autocomplete/author4/my_debug.il",
+        "09_ulearn_autocomplete/author1-refactored/my_debug.il",
         
         "09_ulearn_autocomplete/author1/my_release.il",
         "09_ulearn_autocomplete/author2/my_release.il",
-        "09_ulearn_autocomplete/author4/my_release.il",
+        "09_ulearn_autocomplete/author1-refactored/my_release.il",
         
         "11_ulearn_antiplagiat/author1/my_debug.il",
         "11_ulearn_antiplagiat/author2/my_debug.il",
@@ -78,11 +78,11 @@ public static class ILCodes
         
         "12_ulearn_gauss/author1/my_debug.il",
         "12_ulearn_gauss/author3/my_debug.il",
-        "12_ulearn_gauss/author4/my_debug.il",
+        "12_ulearn_gauss/author1-refactored/my_debug.il",
         
         "12_ulearn_gauss/author1/my_release.il",
         "12_ulearn_gauss/author3/my_release.il",
-        "12_ulearn_gauss/author4/my_release.il",
+        "12_ulearn_gauss/author1-refactored/my_release.il",
         
         "codewars_duration_format/author1/my_release_net_framework_4_7_2.il",
         "codewars_duration_format/author1/my_release_net_core_2_1.il",
