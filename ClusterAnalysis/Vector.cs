@@ -4,17 +4,32 @@ public class Vector
 {
     public static double CosDistance(double[] vecA, double[] vecB)
     {
+        if (vecA.Length + vecB.Length == 0) return 0;
+        if (vecA.Length * vecB.Length == 0) return 1;
+
         double dotProd = 0;
         double sqA = 0;
         double sqB = 0;
-        for (int i = 0; i < vecA.Length; i++)
+        for (int i = 0; i < Math.Max(vecA.Length, vecB.Length); i++)
         {
-            dotProd += vecA[i] * vecB[i];
-            sqA += vecA[i] * vecA[i];
-            sqB += vecB[i] * vecB[i];
+            double curA = TryGetByIndex(vecA, i, 0);
+            double curB = TryGetByIndex(vecB, i, 0);
+            dotProd += curA * curB;
+            sqA += curA * curA;
+            sqB += curB * curB;
         }
 
         return 1d - dotProd / (Math.Sqrt(sqA) * Math.Sqrt(sqB));
+    }
+
+    public static double CosDistance(int[] vecA, int[] vecB)
+    {
+        return CosDistance(vecA.Select(n => n * 1d).ToArray(), vecB.Select(n => n * 1d).ToArray());
+    }
+    
+    public static double CosDistance(List<int> vecA, List<int> vecB)
+    {
+        return CosDistance(vecA.Select(n => n * 1d).ToArray(), vecB.Select(n => n * 1d).ToArray());
     }
 
     public static double[] Normalize(double[] vec)
@@ -26,5 +41,10 @@ public class Vector
         for (int i = 0; i < vec.Length; i++) res[i] = vec[i] / sqSum;
 
         return res;
+    }
+
+    private static T TryGetByIndex<T>(T[] arr, int i, T defaultValue)
+    {
+        return i < arr.Length ? arr[i] : defaultValue;
     }
 }
