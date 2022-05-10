@@ -11,9 +11,16 @@ public static class Settings
 {
     public static bool PrintDebugInfo = false;
 
-    public static double MaxClustersDistance = 0.05;
+    public static double MaxClustersDistance = 0.2;
 
-    public static bool IsLexemesFiltering = false;
+    public static bool IsLexemesFiltering = true;
 
-    public static DistanceMetric DistanceMetric = DistanceMetric.Jaccard;
+    public static DistanceMetric DistanceMetric = DistanceMetric.Stylometry;
 }
+
+/*
+ * Best max distance:
+ *  Jaccard: 0.25
+ *  Cosine: 0.1 (without filtering), 0.05 (with filtering)
+ *  Stylometry: 0.2
+ */
