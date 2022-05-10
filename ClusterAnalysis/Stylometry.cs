@@ -88,25 +88,25 @@ public static class Stylometry
 
         var vecA = new[]
         {
-            dataA.LexicalDiversity * 10,
-            dataA.MethodsAvgLength,
-            dataA.MethodsMaxStackAvg,
-            dataA.MethodsLocalVarsAvgCnt,
+            dataA.LexicalDiversity,
+            dataA.MethodsAvgLength / 100,
+            dataA.MethodsMaxStackAvg / 10,
+            dataA.MethodsLocalVarsAvgCnt / 10,
         };
 
         var vecB = new[]
         {
-            dataB.LexicalDiversity * 10,
-            dataB.MethodsAvgLength,
-            dataB.MethodsMaxStackAvg,
-            dataB.MethodsLocalVarsAvgCnt,
+            dataB.LexicalDiversity,
+            dataB.MethodsAvgLength / 100,
+            dataB.MethodsMaxStackAvg / 10,
+            dataB.MethodsLocalVarsAvgCnt / 10,
         };
 
         if (Settings.PrintDebugInfo)
             Console.WriteLine($"Vec1: {string.Join(",", vecA.Select(n => Math.Round(n, 2)))}\n" +
                               $"Vec2: {string.Join(",", vecB.Select(n => Math.Round(n, 2)))}\n");
         
-        double distance = Vector.CosDistance(vecA, vecB);
+        double distance = Vector.EuclidDistance(vecA, vecB);
         
         if (Settings.PrintDebugInfo)
             Console.WriteLine($"Not corrected distance = {distance}");
