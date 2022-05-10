@@ -78,8 +78,14 @@ public static class Stylometry
         double numberLiteralsDistance
     )
     {
+        if (Settings.PrintDebugInfo)
+            Console.WriteLine($"cosD={codesCosDistance}, strLitD={stringLiteralsDistance}, numLitD={numberLiteralsDistance}");
+
         if (codesCosDistance > 0.5) return 1;
-        
+
+        if (Settings.PrintDebugInfo)
+            Console.WriteLine($"First file stylometry:  {dataA}\nSecond file stylometry: {dataB}\n");
+
         var vecA = new[]
         {
             dataA.LexicalDiversity * 10,
@@ -96,16 +102,29 @@ public static class Stylometry
             dataB.MethodsLocalVarsAvgCnt,
         };
 
+        if (Settings.PrintDebugInfo)
+            Console.WriteLine($"Vec1: {string.Join(",", vecA.Select(n => Math.Round(n, 2)))}\n" +
+                              $"Vec2: {string.Join(",", vecB.Select(n => Math.Round(n, 2)))}\n");
+        
         double distance = Vector.CosDistance(vecA, vecB);
+        
+        if (Settings.PrintDebugInfo)
+            Console.WriteLine($"Not corrected distance = {distance}");
 
         if (codesCosDistance < 0.3)
         {
-            double correctedSimilarity =
-                (1d - distance) *
-                ((1 - stringLiteralsDistance) / 2 + 0.5) *
-                ((1 - numberLiteralsDistance) / 2 + 0.5);
-            return 1 - correctedSimilarity;
+            double correctedDistance = 1 -
+               (1d - distance) *
+               ((1 - stringLiteralsDistance) / 2 + 0.5) *
+               ((1 - numberLiteralsDistance) / 2 + 0.5);
+            
+            if (Settings.PrintDebugInfo)
+                Console.WriteLine($"Corrected distance = {correctedDistance}");
+
+            return correctedDistance;
         }
+        
+        if (Settings.PrintDebugInfo) Console.WriteLine();
 
         return distance;
     }

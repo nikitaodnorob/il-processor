@@ -303,7 +303,12 @@ internal static class Program
         var numberLiteralsVecA = NumberLiteralsList[fileNameA];
         var numberLiteralsVecB = NumberLiteralsList[fileNameB];
 
-        // Console.WriteLine(fileNameA + "-" + fileNameB + "=" + Stylometry.CalcDistance(dataA, dataB, GetCodesCosDistance(fileNameA, fileNameB)));
+        if (Settings.PrintDebugInfo)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(fileNameA + " - " + fileNameB);
+            Console.ResetColor();
+        }
 
         return Stylometry.CalcDistance(
             dataA,

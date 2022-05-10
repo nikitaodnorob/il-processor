@@ -9,6 +9,8 @@ public enum DistanceMetric
 
 public static class Settings
 {
+    public static bool PrintDebugInfo = false;
+
     public static double MaxClustersDistance = 0.05;
 
     public static bool IsLexemesFiltering = false;
