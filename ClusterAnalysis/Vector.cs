@@ -19,6 +19,8 @@ public class Vector
             sqB += curB * curB;
         }
 
+        if (sqA + sqB == 0) return 0;
+
         return 1d - dotProd / (Math.Sqrt(sqA) * Math.Sqrt(sqB));
     }
 
