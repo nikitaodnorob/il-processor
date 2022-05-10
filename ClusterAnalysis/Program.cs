@@ -45,9 +45,7 @@ internal static class Program
 
         int rightOneClusterCnt = 0;
         int wrongOneClusterCnt = 0;
-        int wrongDifferentClustersCnt = 0;
-        // int rightDifferentClustersCnt = 0;
-        
+
         // check accuracy
         for (int i = 0; i < ILCodes.Files.Count; i++)
         {
@@ -80,31 +78,31 @@ internal static class Program
                     // Console.ResetColor();
                     wrongOneClusterCnt++;
                 }
-                else if (author1 == author2 && cluster1 != cluster2)
-                {
-                    // Console.ForegroundColor = ConsoleColor.Yellow;
-                    // Console.WriteLine($"{fileName1} {fileName2}");
-                    // Console.ResetColor();
-                    wrongDifferentClustersCnt++;
-                }
-                // else if (author1 != author2 && cluster1 != cluster2)
-                // {
-                //     rightDifferentClustersCnt++;
-                // }
             }
         }
 
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine("\n============\n");
+        int clustersCnt = clusters.Count;
+        int primitiveClustersCnt = clusters.Count(cluster => cluster.Count == 1);
+        int correctClustersCnt = clusters.Count(cluster => (
+                cluster.Count > 1 && cluster.Select(fileName => int.Parse(fileName.Substring(
+                fileName.IndexOf("/author", StringComparison.Ordinal) + 7,
+                1
+            ))).Distinct().Count() == 1
+        ));
+
+        Console.WriteLine();
 
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"N1 (really one cluster) = {rightOneClusterCnt}");
-        Console.WriteLine($"N2 (wrong one cluster) = {wrongOneClusterCnt}");
-        Console.WriteLine($"N3 (wrong different clusters) = {wrongDifferentClustersCnt}");
-        // Console.WriteLine($"N4 (really different clusters) = {rightDifferentClustersCnt}");
+        Console.WriteLine($"N1 (pairs really one cluster) = {rightOneClusterCnt}");
+        Console.WriteLine($"N2 (pairs wrong one cluster) = {wrongOneClusterCnt}");
+        Console.WriteLine($"Clusters count = {clustersCnt}");
+        Console.WriteLine($"Primitive clusters count = {primitiveClustersCnt}");
+        Console.WriteLine($"Correct clusters count = {correctClustersCnt}");
 
-        double accuracy = (4d * rightOneClusterCnt - 2d * wrongOneClusterCnt - wrongDifferentClustersCnt) /
-                          (6d * (rightOneClusterCnt + wrongOneClusterCnt + wrongDifferentClustersCnt)) + 1d / 3;
+        double accuracy =
+                (1d * rightOneClusterCnt / (rightOneClusterCnt + wrongOneClusterCnt) / 2d) +
+                (1d * correctClustersCnt / clustersCnt / 2d) -
+                (1d * primitiveClustersCnt / clustersCnt / 3d);
         Console.WriteLine($"Accuracy = {accuracy}");
     }
 
