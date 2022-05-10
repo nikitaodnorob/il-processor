@@ -8,6 +8,7 @@ public static class LexemesFilter
     {
         code = FilterPunctuation(code);
         code = FilterUselessKeywords(code);
+        code = FilterUselessAsmCommands(code);
         code = FilterLabels(code);
         code = FilterLinesEnd(code);
         code = CorrectEntities(code);
@@ -36,6 +37,70 @@ public static class LexemesFilter
                 or ".maxstack" or ".locals" or ".custom"
         ).ToList();
     }
+
+    private static List<Lexeme> FilterUselessAsmCommands(List<Lexeme> code)
+    {
+        /* 11_ulearn_antiplagiat/author2/my_debug.il:362
+            IL_0178: br.s         IL_017a
+            IL_017a: ldloc.s      V_10
+         */
+
+        var code2 = new List<Lexeme>();
+
+        for (int i = 0; i < code.Count; i++)
+        {
+            if (
+                i < code.Count - 5 &&
+                code[i].Kind == LexemeKind.LineEnd &&
+                code[i + 1].Kind == LexemeKind.Label &&
+                code[i + 2].Kind == LexemeKind.AssemblerCommand && code[i + 2].LexemeText == "br.s" &&
+                code[i + 3].Kind == LexemeKind.Label &&
+                code[i + 4].Kind == LexemeKind.LineEnd &&
+                code[i + 5].Kind == LexemeKind.Label &&
+                code[i + 3].LexemeText == code[i + 5].LexemeText
+            )
+            {
+                i += 4;
+                continue;
+            }
+
+            if (code[i].Kind == LexemeKind.AssemblerCommand && code[i].LexemeText == "nop")
+                continue;
+
+            code2.Add(code[i]);
+        }
+        
+        /* 11_ulearn_antiplagiat/author2/my_debug.il:346
+            IL_0154: stloc.s V_9
+            IL_0156: ldloc.s V_9
+         */
+
+        var code3 = new List<Lexeme>();
+        for (int i = 0; i < code2.Count; i++)
+        {
+            if (
+                i < code2.Count - 7 &&
+                code2[i].Kind == LexemeKind.LineEnd &&
+                code2[i + 1].Kind == LexemeKind.Label &&
+                code2[i + 2].Kind == LexemeKind.AssemblerCommand && code2[i + 2].LexemeText == "stloc.s" &&
+                code2[i + 3].Kind == LexemeKind.Entity &&
+                code2[i + 4].Kind == LexemeKind.LineEnd &&
+                code2[i + 5].Kind == LexemeKind.Label &&
+                code2[i + 6].Kind == LexemeKind.AssemblerCommand && code2[i + 6].LexemeText == "ldloc.s" &&
+                code2[i + 7].Kind == LexemeKind.Entity &&
+                code2[i + 3].LexemeText == code2[i + 7].LexemeText
+            )
+            {
+                i += 8;
+                continue;
+            }
+            
+            code3.Add(code2[i]);
+        }
+
+        return code3;
+    }
+    
 
     private static List<Lexeme> FilterLabels(List<Lexeme> code)
     {
