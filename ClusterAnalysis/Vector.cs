@@ -57,7 +57,7 @@ public static class Vector
         for (int i = 0; i < vec.Length; i++) sqSum += vec[i] * vec[i];
 
         double[] res = new double[vec.Length];
-        for (int i = 0; i < vec.Length; i++) res[i] = vec[i] / sqSum;
+        for (int i = 0; i < vec.Length; i++) res[i] = vec[i] / Math.Sqrt(sqSum);
 
         return res;
     }
