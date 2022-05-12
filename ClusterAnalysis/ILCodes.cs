@@ -10,6 +10,9 @@ public static class ILCodes
         "01_ulearn_rectangles/author2/my_release.il",
         "01_ulearn_rectangles/author2-net5/my_release.il",
         "01_ulearn_rectangles/author2-netcore3/my_release.il",
+        "01_ulearn_rectangles/author5-net6_builder/my_release.il",
+        "01_ulearn_rectangles/author6-net6_singleton/my_release.il",
+        "01_ulearn_rectangles/author7-net6_factory/my_release.il",
         
         "02_ulearn_pluralize/author1/my_release.il",
         "02_ulearn_pluralize/author1-net5/my_release.il",
@@ -20,6 +23,9 @@ public static class ILCodes
         "02_ulearn_pluralize/author3/my_release.il",
         "02_ulearn_pluralize/author3-net5/my_release.il",
         "02_ulearn_pluralize/author3-netcore3/my_release.il",
+        "02_ulearn_pluralize/author5-net6_builder/my_release.il",
+        "02_ulearn_pluralize/author6-net6_singleton/my_release.il",
+        "02_ulearn_pluralize/author7-net6_factory/my_release.il",
         
         "03_ulearn_distance/author1/my_release.il",
         "03_ulearn_distance/author1-net5/my_release.il",
@@ -30,6 +36,9 @@ public static class ILCodes
         "03_ulearn_distance/author3/my_release.il",
         "03_ulearn_distance/author3-net5/my_release.il",
         "03_ulearn_distance/author3-netcore3/my_release.il",
+        "03_ulearn_distance/author5-net6_builder/my_release.il",
+        "03_ulearn_distance/author6-net6_singleton/my_release.il",
+        "03_ulearn_distance/author7-net6_factory/my_release.il",
         
         "04_ulearn_mazes/author1/my_release.il",
         "04_ulearn_mazes/author1-net5/my_release.il",
