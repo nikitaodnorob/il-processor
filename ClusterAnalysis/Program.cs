@@ -19,7 +19,7 @@ internal static class Program
             string ilCode = File.ReadAllText($"../../../../../master-diploma/{fileName}");
             Console.WriteLine($"Processing {fileName}");
             var fileLexemes = Lexer.GetLexemes(ilCode);
-            Codes.Add(fileName, fileLexemes);
+            Codes.Add(fileName, Settings.IsLexemesFiltering ? LexemesFilter.Filter(fileLexemes) : fileLexemes);
             clusters.Add(new List<string> {fileName});
         }
         Console.WriteLine("==================");
@@ -153,22 +153,15 @@ internal static class Program
 
     private static void PrepareForCount()
     {
-        var correctedCodes = new Dictionary<string, List<Lexeme>>();
-        foreach (var fileName in Codes.Keys)
-            correctedCodes.Add(
-                fileName,
-                Settings.IsLexemesFiltering ? LexemesFilter.Filter(Codes[fileName]) : Codes[fileName]
-            );
+        var lexemesText = GetUniqLexemesText(Codes);
+        var stringLiterals = GetUniqStringLiterals(Codes).ToList();
+        var numberLiterals = GetUniqNumberLiterals(Codes).ToList();
 
-        var lexemesText = GetUniqLexemesText(correctedCodes);
-        var stringLiterals = GetUniqStringLiterals(correctedCodes).ToList();
-        var numberLiterals = GetUniqNumberLiterals(correctedCodes).ToList();
+        var idf = GetIDF(lexemesText, Codes);
 
-        var idf = GetIDF(lexemesText, correctedCodes);
-
-        FillLexemesBag(lexemesText, correctedCodes, idf);
-        FillStringLiteralsList(stringLiterals, correctedCodes);
-        FillNumberLiteralsList(numberLiterals, correctedCodes);
+        FillLexemesBag(lexemesText, Codes, idf);
+        FillStringLiteralsList(stringLiterals, Codes);
+        FillNumberLiteralsList(numberLiterals, Codes);
         
         foreach (var fileName in Codes.Keys)
             StylometryDataList.Add(fileName, GetStylometryData(fileName));
@@ -268,16 +261,13 @@ internal static class Program
     {
         var codeA = Codes[fileNameA];
         var codeB = Codes[fileNameB];
-        
-        // codeA = CorrectFileLexemes(codeA);
-        // codeB = CorrectFileLexemes(codeB);
-        
+
         var codeALexemes = new HashSet<string>();
         var codeBLexemes = new HashSet<string>();
         codeA.ForEach(lexeme => codeALexemes.Add(lexeme.LexemeText));
         codeB.ForEach(lexeme => codeBLexemes.Add(lexeme.LexemeText));
-        var codeABLexemes = codeALexemes.Intersect(codeBLexemes);
 
+        var codeABLexemes = codeALexemes.Intersect(codeBLexemes);
         int codeABLexemesCount = codeABLexemes.Count();
 
         return 1d - 1d * codeABLexemesCount / (codeALexemes.Count + codeBLexemes.Count - codeABLexemesCount);

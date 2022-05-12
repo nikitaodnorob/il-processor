@@ -21,6 +21,6 @@ public static class Settings
 /*
  * Best max distance:
  *  Jaccard: 0.25
- *  Cosine: 0.1 (without filtering), 0.05 (with filtering)
+ *  Cosine: 0.1 (without filtering), 0.025 (with filtering)
  *  Stylometry: 0.2
  */
