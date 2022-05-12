@@ -6,8 +6,6 @@ public static class Stylometry
 {
     public static StylometryCodeData CalcStylometryData(List<Lexeme> lexemes)
     {
-        if (Settings.IsLexemesFiltering) lexemes = LexemesFilter.Filter(lexemes);
-
         var uniqLexemesSet = new HashSet<string>();
         lexemes.ForEach(lexeme => uniqLexemesSet.Add(lexeme.LexemeText));
 
@@ -23,8 +21,14 @@ public static class Stylometry
         var methodsMaxStack = new List<int>();
         bool isMethodMaxStack = false;
 
+        int outCnt = 0;
+        int literalsCnt = 0;
+
         foreach (var lexeme in lexemes)
         {
+            if (lexeme.Kind == LexemeKind.Keyword && lexeme.LexemeText == "literal")
+                literalsCnt++;
+
             if (!isMethod && lexeme.Kind == LexemeKind.Directive && lexeme.LexemeText == ".method")
                 isMethodDeclaration = true;
 
@@ -39,6 +43,9 @@ public static class Stylometry
 
             if (isMethod && lexeme.Kind == LexemeKind.AssemblerCommand && lexeme.LexemeText != "nop")
                 methodsLength[^1]++;
+
+            if (isMethodDeclaration && lexeme.Kind == LexemeKind.Directive && lexeme.LexemeText == "[out]")
+                outCnt++;
 
             if (isMethod && lexeme.Kind == LexemeKind.Directive && lexeme.LexemeText == ".locals")
                 isMethodLocalVars = true;
@@ -67,6 +74,8 @@ public static class Stylometry
             MethodsAvgLength = methodsLength.Count > 0 ? methodsLength.Average() : 0,
             MethodsLocalVarsAvgCnt = methodsLocalVarsCnt.Count > 0 ? methodsLocalVarsCnt.Average() : 0,
             MethodsMaxStackAvg = methodsMaxStack.Count > 0 ? methodsMaxStack.Average() : 0,
+            OutFrequency = 1d * outCnt / lexemes.Count,
+            LiteralFrequency = 1d * literalsCnt / lexemes.Count,
         };
     }
 
@@ -89,6 +98,8 @@ public static class Stylometry
         var vecA = new[]
         {
             dataA.LexicalDiversity,
+            // dataA.OutFrequency * 10,
+            // dataA.LiteralFrequency * 10,
             dataA.MethodsAvgLength / 100,
             dataA.MethodsMaxStackAvg / 10,
             dataA.MethodsLocalVarsAvgCnt / 10,
@@ -97,6 +108,8 @@ public static class Stylometry
         var vecB = new[]
         {
             dataB.LexicalDiversity,
+            // dataB.OutFrequency * 10,
+            // dataB.LiteralFrequency * 10,
             dataB.MethodsAvgLength / 100,
             dataB.MethodsMaxStackAvg / 10,
             dataB.MethodsLocalVarsAvgCnt / 10,
