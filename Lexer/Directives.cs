@@ -6,6 +6,7 @@ namespace ILLexer
     {
         private static readonly List<string> Directives = new List<string>
         {
+            ".interfaceimpl",
             ".property",
             ".maxstack",
             ".class",
@@ -19,6 +20,7 @@ namespace ILLexer
             ".try",
             ".get",
             ".set",
+            "[in]",
             "[out]",
             "[0]",
             "[1]",

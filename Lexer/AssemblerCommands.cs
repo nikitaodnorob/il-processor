@@ -51,6 +51,7 @@ namespace ILLexer
             "ldftn",
             "ldfld",
             "stfld",
+            "throw",
             "push",
             "call",
             "ret",

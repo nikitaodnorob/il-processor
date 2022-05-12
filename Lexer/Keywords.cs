@@ -33,7 +33,12 @@ namespace ILLexer
             "serializable",
             "endfinally",
             "finally",
-            "literal"
+            "literal",
+            "virtual",
+            "final",
+            "implements",
+            "unsigned",
+            "newslot",
         };
     }
 }

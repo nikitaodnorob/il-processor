@@ -340,7 +340,7 @@
                 ? ilLine[colNumber..entityEndPos]
                 : ilLine[colNumber..];
 
-            currentEntity = currentEntity.Replace("[0...", "");
+            currentEntity = currentEntity.Replace("0...", "");
 
             lexemes.Add(new Lexeme
             {
