@@ -12,7 +12,6 @@ public static class ILCodes
         "01_ulearn_rectangles/author2-netcore3/my_release.il",
         "01_ulearn_rectangles/author5-net6_builder/my_release.il",
         "01_ulearn_rectangles/author6-net6_singleton/my_release.il",
-        "01_ulearn_rectangles/author7-net6_factory/my_release.il",
         
         "02_ulearn_pluralize/author1/my_release.il",
         "02_ulearn_pluralize/author1-net5/my_release.il",
@@ -25,7 +24,6 @@ public static class ILCodes
         "02_ulearn_pluralize/author3-netcore3/my_release.il",
         "02_ulearn_pluralize/author5-net6_builder/my_release.il",
         "02_ulearn_pluralize/author6-net6_singleton/my_release.il",
-        "02_ulearn_pluralize/author7-net6_factory/my_release.il",
         
         "03_ulearn_distance/author1/my_release.il",
         "03_ulearn_distance/author1-net5/my_release.il",
@@ -38,7 +36,6 @@ public static class ILCodes
         "03_ulearn_distance/author3-netcore3/my_release.il",
         "03_ulearn_distance/author5-net6_builder/my_release.il",
         "03_ulearn_distance/author6-net6_singleton/my_release.il",
-        "03_ulearn_distance/author7-net6_factory/my_release.il",
         
         "04_ulearn_mazes/author1/my_release.il",
         "04_ulearn_mazes/author1-net5/my_release.il",
@@ -62,7 +59,7 @@ public static class ILCodes
         "06_ulearn_text_analysis/author1/my_release.il",
         "06_ulearn_text_analysis/author2/my_release.il",
         "06_ulearn_text_analysis/author3/my_release.il",
-        "06_ulearn_text_analysis/author4/my_release.il",
+        "06_ulearn_text_analysis/author1-refactored/my_release.il",
         
         "07_ulearn_images/author1/my_release.il",
         "07_ulearn_images/author2/my_release.il",
@@ -84,6 +81,7 @@ public static class ILCodes
         "11_ulearn_antiplagiat/author1/my_release.il",
         "11_ulearn_antiplagiat/author2/my_release.il",
         "11_ulearn_antiplagiat/author4/my_release.il",
+        "11_ulearn_antiplagiat/author6-net6_singleton/my_release.il",
         
         "12_ulearn_gauss/author1/my_debug.il",
         "12_ulearn_gauss/author3/my_debug.il",
@@ -92,6 +90,7 @@ public static class ILCodes
         "12_ulearn_gauss/author1/my_release.il",
         "12_ulearn_gauss/author3/my_release.il",
         "12_ulearn_gauss/author1-refactored/my_release.il",
+        "12_ulearn_gauss/author6-net6_singleton/my_release.il",
         
         "codewars_duration_format/author1/my_release_net_framework_4_7_2.il",
         "codewars_duration_format/author1/my_release_net_core_2_1.il",
