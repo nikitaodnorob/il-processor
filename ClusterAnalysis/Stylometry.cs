@@ -98,8 +98,8 @@ public static class Stylometry
         var vecA = new[]
         {
             dataA.LexicalDiversity,
-            // dataA.OutFrequency * 10,
-            // dataA.LiteralFrequency * 10,
+            dataA.OutFrequency * 10,
+            dataA.LiteralFrequency * 10,
             dataA.MethodsAvgLength / 100,
             dataA.MethodsMaxStackAvg / 10,
             dataA.MethodsLocalVarsAvgCnt / 10,
@@ -108,8 +108,8 @@ public static class Stylometry
         var vecB = new[]
         {
             dataB.LexicalDiversity,
-            // dataB.OutFrequency * 10,
-            // dataB.LiteralFrequency * 10,
+            dataB.OutFrequency * 10,
+            dataB.LiteralFrequency * 10,
             dataB.MethodsAvgLength / 100,
             dataB.MethodsMaxStackAvg / 10,
             dataB.MethodsLocalVarsAvgCnt / 10,
