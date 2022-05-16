@@ -304,8 +304,8 @@ internal static class Program
             dataA,
             dataB,
             GetCodesCosDistance(fileNameA, fileNameB),
-            Vector.CosDistance(stringLiteralsVecA, stringLiteralsVecB),
-            Vector.CosDistance(numberLiteralsVecA, numberLiteralsVecB)
+            LevenshteinCalculator.VectorsDistance(stringLiteralsVecA, stringLiteralsVecB),
+            LevenshteinCalculator.VectorsDistance(numberLiteralsVecA, numberLiteralsVecB)
         );
     }
 
