@@ -18,24 +18,30 @@ public static class LexemesFilter
 
     private static List<Lexeme> FilterPunctuation(List<Lexeme> code)
     {
-        var lexemesWithoutPunctuation = code.Where(lexeme => lexeme.LexemeText is not "," or "");
+        code = code.Where(lexeme => lexeme.LexemeText != "," && lexeme.LexemeText != "").ToList();
 
         if (Settings.DistanceMetric != DistanceMetric.Stylometry)
-            lexemesWithoutPunctuation = code.Where(
-                lexeme => lexeme.LexemeText is not "{" or "}" or "[" or "]" or "(" or ")"
-            );
+            code = code.Where(lexeme => !punctuationChars.Contains(lexeme.LexemeText)).ToList();
 
-        return lexemesWithoutPunctuation.ToList();
+        return code.ToList();
     }
+
+    private static readonly List<string> uselessKeywords = new()
+    {
+        "sealed", "auto", "ansi", "beforefieldinit", "hidebysig", "managed", "valuetype", "final",
+        "specialname", "rtspecialname", "native", "assembly", "only", "nested", "serializable", "newslot"
+    };
+
+    private static readonly List<string> punctuationChars = new() { "{", "}", "[", "]", "(", ")" };
 
     private static List<Lexeme> FilterUselessKeywords(List<Lexeme> code)
     {
-        return code.Where(
-            lexeme => lexeme.LexemeText is not "sealed" or "auto" or "ansi" or "beforefieldinit"
-                or "hidebysig" or "managed" or "valuetype" or "specialname" or "rtspecialname" 
-                or "native" or "assembly" or "only" or "nested" or "serializable" or "literal"
-                or ".maxstack" or ".locals" or ".custom"
-        ).ToList();
+        code = code.Where(lexeme => !uselessKeywords.Contains(lexeme.LexemeText)).ToList();
+
+        if (Settings.DistanceMetric != DistanceMetric.Stylometry)
+            code = code.Where(lexeme => lexeme.LexemeText != ".maxstack" && lexeme.LexemeText != ".locals").ToList();
+
+        return code;
     }
 
     private static List<Lexeme> FilterUselessAsmCommands(List<Lexeme> code)

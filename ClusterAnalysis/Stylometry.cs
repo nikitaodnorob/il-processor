@@ -93,7 +93,7 @@ public static class Stylometry
         if (codesCosDistance > 0.5) return 1;
 
         if (Settings.PrintDebugInfo)
-            Console.WriteLine($"First file stylometry:  {dataA}\nSecond file stylometry: {dataB}\n");
+            Console.WriteLine($"First file stylometry: {dataA}\nSecond file stylometry: {dataB}\n");
 
         var vecA = new[]
         {
