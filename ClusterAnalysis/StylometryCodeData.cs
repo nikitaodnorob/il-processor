@@ -8,6 +8,8 @@ public struct StylometryCodeData
     public double LexicalDiversity;
     public double OutFrequency;
     public double LiteralFrequency;
+    public bool IsBuilderPatternPossible;
+    public bool IsSingletonPatternPossible;
 
     public override string ToString()
     {
@@ -16,6 +18,8 @@ public struct StylometryCodeData
                $"MethodsMaxStackAvg={Math.Round(MethodsMaxStackAvg, 2).ToString(),-5}, " +
                $"LexDiv={Math.Round(LexicalDiversity, 4).ToString(),-6}, " +
                $"OutFreq={Math.Round(OutFrequency, 4).ToString(),-6}, " +
-               $"LiteralFreq={Math.Round(LiteralFrequency, 4).ToString(),-6}";
+               $"LiteralFreq={Math.Round(LiteralFrequency, 4).ToString(),-6}, " +
+               $"IsBuilderPatternPossible={IsBuilderPatternPossible}, " +
+               $"IsSingletonPatternPossible={IsSingletonPatternPossible}";
     }
 }

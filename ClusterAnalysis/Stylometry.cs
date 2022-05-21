@@ -76,6 +76,8 @@ public static class Stylometry
             MethodsMaxStackAvg = methodsMaxStack.Count > 0 ? methodsMaxStack.Average() : 0,
             OutFrequency = 1d * outCnt / lexemes.Count,
             LiteralFrequency = 1d * literalsCnt / lexemes.Count,
+            IsBuilderPatternPossible = StylometryPatternChecker.IsBuilderPatternPossible(lexemes),
+            IsSingletonPatternPossible = StylometryPatternChecker.IsSingletonPatternPossible(lexemes),
         };
     }
 
@@ -87,10 +89,29 @@ public static class Stylometry
         double numberLiteralsDistance
     )
     {
-        if (Settings.PrintDebugInfo)
-            Console.WriteLine($"cosD={codesCosDistance}, strLitD={stringLiteralsDistance}, numLitD={numberLiteralsDistance}");
+        var patternsVecA = new[]
+        {
+            dataA.IsBuilderPatternPossible ? 1.0 : 0,
+            dataA.IsSingletonPatternPossible ? 1.0 : 0,
+        };
+        
+        var patternsVecB = new[]
+        {
+            dataB.IsBuilderPatternPossible ? 1.0 : 0,
+            dataB.IsSingletonPatternPossible ? 1.0 : 0,
+        };
+        
+        double patternsDistance = patternsVecA.Any(n => n > 0) || patternsVecB.Any(n => n > 0)
+            ? Vector.EuclidDistance(patternsVecA, patternsVecB) / Math.Sqrt(patternsVecA.Length)
+            : double.NaN;
 
-        if (codesCosDistance > 0.5) return 1;
+        if (Settings.PrintDebugInfo)
+        {
+            Console.WriteLine($"cosD={codesCosDistance}, strLitD={stringLiteralsDistance}, numLitD={numberLiteralsDistance}");
+            Console.WriteLine($"patterns distance={patternsDistance}");
+        }
+
+        if (codesCosDistance > 0.5 && (double.IsNaN(patternsDistance) || patternsDistance > 0.75)) return 1;
 
         if (Settings.PrintDebugInfo)
             Console.WriteLine($"First file stylometry: {dataA}\nSecond file stylometry: {dataB}\n");
@@ -119,7 +140,9 @@ public static class Stylometry
             Console.WriteLine($"Vec1: {string.Join(",", vecA.Select(n => Math.Round(n, 2)))}\n" +
                               $"Vec2: {string.Join(",", vecB.Select(n => Math.Round(n, 2)))}\n");
         
-        double distance = Vector.EuclidDistance(vecA, vecB);
+        double similarity = (1 - Vector.EuclidDistance(vecA, vecB));
+        if (!double.IsNaN(patternsDistance)) similarity *= 1 - patternsDistance;
+        double distance = 1 - similarity;
         
         if (Settings.PrintDebugInfo)
             Console.WriteLine($"Not corrected distance = {distance}");
@@ -142,10 +165,3 @@ public static class Stylometry
         return distance;
     }
 }
-
-/*
-N1 (really one cluster) = 131
-N2 (wrong one cluster) = 220
-N3 (wrong different clusters) = 557
-Accuracy = 0.24651248164464024
-*/
