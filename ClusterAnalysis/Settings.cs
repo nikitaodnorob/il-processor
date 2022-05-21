@@ -11,7 +11,7 @@ public static class Settings
 {
     public static bool PrintDebugInfo = false;
 
-    public static double MaxClustersDistance = 0.2;
+    public static double MaxClustersDistance = 0.25;
 
     public static bool IsLexemesFiltering = true;
 
@@ -20,7 +20,7 @@ public static class Settings
 
 /*
  * Best max distance:
- *  Jaccard: 0.25
- *  Cosine: 0.1 (without filtering), 0.025 (with filtering)
- *  Stylometry: 0.2
+ *  Jaccard: 0.2 (without filtering), 0.15 (with filtering)
+ *  Cosine: 0.1 (without filtering), 0.0375 (with filtering)
+ *  Stylometry: 0.25 with filtering
  */
